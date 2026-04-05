@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DigiWave Imóveis</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: linear-gradient(to right, #f5f7fa, #e4ecf7);
+  padding: 20px;
+}
+
+h1 { text-align: center; }
+
+#imoveis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.img-imovel {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+button {
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover { background: #0056b3; }
+
+input {
+  padding: 10px;
+  margin: 5px;
+  width: 90%;
+}
+
+/* FAB */
+.fab-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  text-align: center;
+}
+
+.fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 30px;
+}
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+  position: relative;
+}
+
+/* BOTÃO X */
+.fechar {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #007bff;
+}
+
+.icon {
+  color: #007bff;
+}
+</style>
+</head>
+
+<body>
+
+<h1>DigiWave Imóveis</h1>
+
+<button onclick="logout()" style="position:fixed; top:20px; right:20px;">Sair</button>
+
+<div class="fab-container">
+  <button class="fab" onclick="abrirModalAdicionar()">+</button>
+  <div style="color:#007bff;">Adicionar</div>
+</div>
+
+<div id="imoveis"></div>
+
+<!-- LOGIN -->
+<div id="tela-login" class="modal">
+  <div class="modal-content">
+    <h2>Bem-vindo</h2>
+
+    <button onclick="mostrarLogin()">Fazer Login</button>
+    <button onclick="entrarVisitante()">Continuar como visitante</button>
+
+    <div id="area-login" style="display:none;">
+      <input id="usuario" placeholder="Usuário">
+      <input id="senha" type="password" placeholder="Senha">
+      <button onclick="fazerLogin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADICIONAR -->
+<div id="modal-adicionar" class="modal">
+  <div class="modal-content">
+    <span class="fechar" onclick="fecharModalAdicionar()">✖</span>
+
+    <h2>Novo Imóvel</h2>
+
+    <input id="titulo" placeholder="Título">
+    <input id="preco" placeholder="Preço">
+    <input id="imagem" placeholder="URL da imagem">
+    <input id="cidade" placeholder="Cidade">
+    <input id="contato" placeholder="Contato">
+
+    <button onclick="adicionarImovel()">Salvar</button>
+  </div>
+</div>
+
+<script>
+// ================= LOGIN =================
+function mostrarLogin() {
+  document.getElementById("area-login").style.display = "block";
+}
+
+function fazerLogin() {
+  let usuario = document.getElementById("usuario").value;
+  let senha = document.getElementById("senha").value;
+
+  if (usuario === "admin" && senha === "123") {
+    localStorage.setItem("logado", "true");
+    iniciarSistema();
+  } else {
+    alert("Usuário ou senha inválidos");
+  }
+}
+
+function entrarVisitante() {
+  localStorage.setItem("logado", "true");
+  iniciarSistema();
+}
+
+function logout() {
+  localStorage.removeItem("logado");
+  location.reload();
+}
+
+function iniciarSistema() {
+  document.getElementById("tela-login").style.display = "none";
+  carregarImoveis();
+}
+
+// ================= MODAL =================
+function abrirModalAdicionar() {
+  document.getElementById("modal-adicionar").style.display = "flex";
+}
+
+function fecharModalAdicionar() {
+  document.getElementById("modal-adicionar").style.display = "none";
+}
+
+// fechar clicando fora
+window.onclick = function(event) {
+  let modal = document.getElementById("modal-adicionar");
+  if (event.target === modal) {
+    fecharModalAdicionar();
+  }
+}
+
+// ================= BACKEND =================
+function carregarImoveis() {
+  fetch("https://digiwave-backend.onrender.com/imoveis")
+    .then(res => res.json())
+    .then(data => {
+      const div = document.getElementById("imoveis");
+      div.innerHTML = "";
+
+      data.forEach((imovel, index) => {
+        div.innerHTML += `
+          <div class="card">
+            <img src="${imovel.imagem}" class="img-imovel">
+            <h3>${imovel.titulo}</h3>
+            <p><span class="icon">💰</span> ${imovel.preco}</p>
+            <p><span class="icon">📍</span> ${imovel.cidade}</p>
+            <button onclick="deletarImovel(${index})">🗑️ Deletar</button>
+          </div>
+        `;
+      });
+    });
+}
+
+function adicionarImovel() {
+  if (localStorage.getItem("logado") !== "true") {
+    alert("Você precisa estar logado!");
+    return;
+  }
+
+  const titulo = document.getElementById('titulo').value;
+  const preco = document.getElementById('preco').value;
+  const imagem = document.getElementById('imagem').value;
+  const cidade = document.getElementById('cidade').value;
+  const contato = document.getElementById('contato').value;
+
+  fetch("https://digiwave-backend.onrender.com/imoveis", {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({ titulo, preco, imagem, cidade, contato })
+})
+  .then(() => {
+    carregarImoveis();
+    fecharModalAdicionar();
+  });
+}
+
+function deletarImovel(index) {
+  if (localStorage.getItem("logado") !== "true") {
+    alert("Você precisa estar logado!");
+    return;
+  }
+
+  fetch(`https://digiwave-backend.onrender.com/imoveis/${index}`, {
+    method: "DELETE"
+  })
+  .then(() => carregarImoveis());
+}
+
+// ================= INICIALIZAÇÃO =================
+window.onload = function () {
+  if (localStorage.getItem("logado") === "true") {
+    iniciarSistema();
+  } else {
+    document.getElementById("tela-login").style.display = "flex";
+  }
+}
+</script>
+
+</body>
+</html>

@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'frontend_build')));
 
 // Todas as rotas vão para index.html
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'frontend_build', 'index.html'));
 });
 

@@ -5,17 +5,17 @@ const path = require('path');
 const app = express();
 app.use(cors());
 
-// Serve arquivos estáticos do frontend
-app.use(express.static(path.join(__dirname, 'frontend_build')));
-
-// Todas as rotas vão para index.html
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend_build', 'index.html'));
-});
-
-// Exemplo de endpoint da API
+// API primeiro
 app.get('/imoveis', (req, res) => {
   res.json([{ titulo: "Casa teste", preco: 100000 }]);
+});
+
+// Servir frontend
+app.use(express.static(path.join(__dirname, 'frontend_build')));
+
+// Rota final (catch-all)
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend_build', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;

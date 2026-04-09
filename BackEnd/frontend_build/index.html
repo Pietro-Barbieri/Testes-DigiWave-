@@ -201,7 +201,7 @@ window.onclick = function(event) {
 
 // ================= BACKEND =================
 function carregarImoveis() {
-  fetch("https://testes-digiwave-1tux.onrender.com/")
+  fetch("https://testes-digiwave-1-ad52.onrender.com/imoveis")
     .then(res => res.json())
     .then(data => {
       const div = document.getElementById("imoveis");
@@ -233,7 +233,7 @@ function adicionarImovel() {
   const cidade = document.getElementById('cidade').value;
   const contato = document.getElementById('contato').value;
 
-  fetch("https://testes-digiwave-1tux.onrender.com/", {
+  fetch("https://testes-digiwave-1-ad52.onrender.com/imoveis", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ titulo, preco, imagem, cidade, contato })
@@ -250,7 +250,7 @@ function deletarImovel(index) {
     return;
   }
 
-  fetch(`https://testes-digiwave-1tux.onrender.com/${index}`, {
+  fetch(`https://testes-digiwave-1-ad52.onrender.com/imoveis/${index}`, {
     method: "DELETE"
   })
   .then(() => carregarImoveis());

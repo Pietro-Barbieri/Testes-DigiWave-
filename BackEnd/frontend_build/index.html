@@ -168,7 +168,7 @@ function fazerLogin() {
 }
 
 function entrarVisitante() {
-  localStorage.setItem("logado", "true");
+  localStorage.setItem("logado", "visitante");
   iniciarSistema();
 }
 
@@ -222,7 +222,7 @@ function carregarImoveis() {
 }
 
 function adicionarImovel() {
-  if (localStorage.getItem("logado") !== "true") {
+  if (localStorage.getItem("logado") !== "admin") {
     alert("Você precisa estar logado!");
     return;
   }
@@ -245,7 +245,7 @@ function adicionarImovel() {
 }
 
 function deletarImovel(index) {
-  if (localStorage.getItem("logado") !== "true") {
+  if (localStorage.getItem("logado") !== "admin") {
     alert("Você precisa estar logado!");
     return;
   }

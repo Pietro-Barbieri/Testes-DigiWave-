@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import json
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -21,6 +22,11 @@ def write_db(data):
         json.dump(data, f)
 
 
+@app.route("/")
+def index():
+    return send_from_directory("frontend_build", "index.html")
+
+
 @app.route("/imoveis", methods=["GET"])
 def get_imoveis():
     return jsonify(read_db())
@@ -36,10 +42,8 @@ def add_imovel():
         "preco": novo.get("preco"),
         "cidade": novo.get("cidade"),
         "contato": novo.get("contato"),
-        "imagem": novo.get("imagem")  # 👈 SEM DEFAULT, SEM ALTERAÇÃO
+        "imagem": novo.get("imagem")
     }
-
-    print(imovel)  # 👈 DEBUG (IMPORTANTE)
 
     data.append(imovel)
     write_db(data)
@@ -59,9 +63,6 @@ def delete_imovel(index):
     return jsonify({"error": "Erro"}), 404
 
 
-import os
-
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-    

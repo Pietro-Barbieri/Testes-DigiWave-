@@ -1,133 +1,593 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DigiWave Imóveis</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-body {
-  font-family: Arial;
-  background: linear-gradient(to right, #f5f7fa, #e4ecf7);
-  padding: 20px;
+:root {
+  --bg: #0a0f1e;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --accent: #00d4ff;
+  --accent2: #0099cc;
+  --text: #e8f0fe;
+  --text-muted: #6b7fa3;
+  --danger: #ff4d6d;
+  --success: #00e5a0;
+  --border: rgba(0, 212, 255, 0.15);
+  --radius: 16px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-h1 { text-align: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background animado */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(0, 153, 204, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* HEADER */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: rgba(10, 15, 30, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#badge-usuario {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--surface2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+#badge-usuario.admin {
+  color: var(--accent);
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 8px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(255, 77, 109, 0.08);
+}
+
+/* MAIN */
+main {
+  position: relative;
+  z-index: 1;
+  padding: 100px 32px 120px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 36px;
+}
+
+#contador {
+  display: inline-block;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+}
+
+/* GRID */
 #imoveis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
 }
 
+/* CARD */
 .card {
-  background: white;
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 212, 255, 0.2);
+  border-color: rgba(0, 212, 255, 0.3);
 }
 
 .img-imovel {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  border-radius: 12px;
+  display: block;
 }
 
-button {
+.card-body {
+  padding: 20px;
+}
+
+.card-titulo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.card-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.card-info-item span:first-child {
+  font-size: 1rem;
+}
+
+.card-preco {
+  color: var(--success);
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.card-footer {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 20px;
+}
+
+.btn-deletar {
+  flex: 1;
+  background: rgba(255, 77, 109, 0.1);
+  border: 1px solid rgba(255, 77, 109, 0.2);
+  color: var(--danger);
   padding: 10px;
-  margin: 5px;
-  border: none;
-  border-radius: 8px;
-  background: #007bff;
-  color: white;
+  border-radius: 10px;
   cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  transition: all 0.2s;
 }
 
-button:hover { background: #0056b3; }
+.btn-deletar:hover {
+  background: rgba(255, 77, 109, 0.2);
+  border-color: var(--danger);
+}
 
-input {
-  padding: 10px;
-  margin: 5px;
-  width: 90%;
+/* EMPTY STATE */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 1rem;
 }
 
 /* FAB */
 .fab-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  text-align: center;
+  bottom: 32px;
+  right: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 100;
 }
 
 .fab {
-  width: 60px;
-  height: 60px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  font-size: 30px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  color: var(--bg);
+  font-size: 26px;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
-/* MODAL */
+.fab:hover {
+  transform: scale(1.1) rotate(45deg);
+  box-shadow: 0 12px 32px rgba(0, 212, 255, 0.5);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+}
+
+.fab-label {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* MODAIS */
 .modal {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.7);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
   justify-content: center;
   align-items: center;
+  z-index: 200;
+  padding: 20px;
 }
 
 .modal-content {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  box-shadow: var(--shadow), 0 0 60px rgba(0, 212, 255, 0.08);
+  animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.modal-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.fechar {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  padding: 4px;
+  line-height: 1;
+}
+
+.fechar:hover { color: var(--danger); background: transparent; }
+
+/* INPUTS */
+.input-group {
+  margin-bottom: 14px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.input-group input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.input-group input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+.input-group input::placeholder { color: var(--text-muted); }
+
+/* BOTÕES */
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  color: var(--bg);
+  padding: 13px;
+  border-radius: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 8px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+}
+
+.btn-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 12px;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.btn-secondary:hover {
+  border-color: rgba(255,255,255,0.2);
+  color: var(--text);
+  background: transparent;
+}
+
+/* LOGIN */
+.login-divider {
   text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 16px 0;
   position: relative;
 }
 
-/* BOTÃO X */
-.fechar {
+.login-divider::before, .login-divider::after {
+  content: '';
   position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 20px;
-  cursor: pointer;
-  color: #007bff;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: var(--border);
 }
 
-.icon {
-  color: #007bff;
+.login-divider::before { left: 0; }
+.login-divider::after { right: 0; }
+
+#area-login {
+  display: none;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 999;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.erro { border-color: rgba(255,77,109,0.4); color: var(--danger); }
+.toast.sucesso { border-color: rgba(0,229,160,0.4); color: var(--success); }
+
+/* LOADING */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  grid-column: 1 / -1;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  header { padding: 14px 20px; }
+  main { padding: 90px 16px 120px; }
+  .page-title { font-size: 1.6rem; }
+  .fab-container { bottom: 20px; right: 20px; }
 }
 </style>
 </head>
 
 <body>
 
-<h1>DigiWave Imóveis</h1>
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    DigiWave
+  </div>
+  <div class="header-right">
+    <span id="badge-usuario"></span>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</header>
 
-<button onclick="logout()" style="position:fixed; top:20px; right:20px;">Sair</button>
+<!-- MAIN -->
+<main>
+  <h1 class="page-title">Imóveis Captados</h1>
+  <p class="page-subtitle">Gerencie os imóveis cadastrados na plataforma</p>
+  <div id="contador"></div>
+  <div id="imoveis"></div>
+</main>
 
+<!-- FAB -->
 <div class="fab-container">
-  <button class="fab" onclick="abrirModalAdicionar()">+</button>
-  <div style="color:#007bff;">Adicionar</div>
+  <button class="fab" onclick="abrirModalAdicionar()" title="Adicionar imóvel">+</button>
+  <span class="fab-label">Adicionar</span>
 </div>
 
-<div id="imoveis"></div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-<!-- LOGIN -->
+<!-- MODAL LOGIN -->
 <div id="tela-login" class="modal">
   <div class="modal-content">
-    <h2>Bem-vindo</h2>
+    <div class="modal-title">Bem-vindo 👋</div>
+    <div class="modal-subtitle">Acesse sua conta ou entre como visitante</div>
 
-    <button onclick="mostrarLogin()">Fazer Login</button>
-    <button onclick="entrarVisitante()">Continuar como visitante</button>
+    <button class="btn-primary" onclick="mostrarLogin()">Fazer Login</button>
+    <button class="btn-secondary" onclick="entrarVisitante()">Continuar como visitante</button>
 
-    <div id="area-login" style="display:none;">
-      <input id="usuario" placeholder="Usuário">
-      <input id="senha" type="password" placeholder="Senha">
-      <button onclick="fazerLogin()">Entrar</button>
+    <div id="area-login">
+      <div class="login-divider">login</div>
+      <div class="input-group">
+        <label>Usuário</label>
+        <input id="usuario" placeholder="Digite seu usuário" onkeydown="if(event.key==='Enter') fazerLogin()">
+      </div>
+      <div class="input-group">
+        <label>Senha</label>
+        <input id="senha" type="password" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter') fazerLogin()">
+      </div>
+      <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
     </div>
   </div>
 </div>
@@ -135,55 +595,100 @@ input {
 <!-- MODAL ADICIONAR -->
 <div id="modal-adicionar" class="modal">
   <div class="modal-content">
-    <span class="fechar" onclick="fecharModalAdicionar()">✖</span>
+    <button class="fechar" onclick="fecharModalAdicionar()">✕</button>
+    <div class="modal-title">Novo Imóvel</div>
+    <div class="modal-subtitle">Preencha os dados do imóvel</div>
 
-    <h2>Novo Imóvel</h2>
+    <div class="input-group">
+      <label>Título</label>
+      <input id="titulo" placeholder="Ex: Casa com 3 quartos em condomínio">
+    </div>
+    <div class="input-group">
+      <label>Preço</label>
+      <input id="preco" placeholder="Ex: R$ 450.000">
+    </div>
+    <div class="input-group">
+      <label>URL da Imagem</label>
+      <input id="imagem" placeholder="https://...">
+    </div>
+    <div class="input-group">
+      <label>Cidade</label>
+      <input id="cidade" placeholder="Ex: Belo Horizonte - MG">
+    </div>
+    <div class="input-group">
+      <label>Contato</label>
+      <input id="contato" placeholder="Ex: (35) 99999-0000">
+    </div>
 
-    <input id="titulo" placeholder="Título">
-    <input id="preco" placeholder="Preço">
-    <input id="imagem" placeholder="URL da imagem">
-    <input id="cidade" placeholder="Cidade">
-    <input id="contato" placeholder="Contato">
-
-    <button onclick="adicionarImovel()">Salvar</button>
+    <button class="btn-primary" onclick="adicionarImovel()">Salvar Imóvel</button>
   </div>
 </div>
 
 <script>
+const API = "https://testes-digiwave-1-ad52.onrender.com";
+
+// ================= TOAST =================
+function mostrarToast(msg, tipo = "") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + tipo;
+  setTimeout(() => t.className = "toast", 3000);
+}
+
 // ================= LOGIN =================
 function mostrarLogin() {
   document.getElementById("area-login").style.display = "block";
+  document.getElementById("usuario").focus();
 }
 
 function fazerLogin() {
-  let usuario = document.getElementById("usuario").value;
-  let senha = document.getElementById("senha").value;
+  const usuario = document.getElementById("usuario").value.trim();
+  const senha = document.getElementById("senha").value;
 
   if (usuario === "admin" && senha === "123") {
-    localStorage.setItem("logado", "true");
+    localStorage.setItem("perfil", "admin");
     iniciarSistema();
   } else {
-    alert("Usuário ou senha inválidos");
+    mostrarToast("Usuário ou senha inválidos", "erro");
   }
 }
 
 function entrarVisitante() {
-  localStorage.setItem("logado", "visitante");
+  localStorage.setItem("perfil", "visitante");
   iniciarSistema();
 }
 
 function logout() {
-  localStorage.removeItem("logado");
+  localStorage.removeItem("perfil");
   location.reload();
+}
+
+function isAdmin() {
+  return localStorage.getItem("perfil") === "admin";
 }
 
 function iniciarSistema() {
   document.getElementById("tela-login").style.display = "none";
+
+  const perfil = localStorage.getItem("perfil");
+  const badge = document.getElementById("badge-usuario");
+  if (perfil === "admin") {
+    badge.textContent = "⚡ Admin";
+    badge.className = "admin";
+  } else {
+    badge.textContent = "👁 Visitante";
+    badge.className = "";
+  }
+
   carregarImoveis();
 }
 
 // ================= MODAL =================
 function abrirModalAdicionar() {
+  if (!isAdmin()) {
+    mostrarToast("Apenas administradores podem adicionar imóveis", "erro");
+    return;
+  }
   document.getElementById("modal-adicionar").style.display = "flex";
 }
 
@@ -191,74 +696,126 @@ function fecharModalAdicionar() {
   document.getElementById("modal-adicionar").style.display = "none";
 }
 
-// fechar clicando fora
 window.onclick = function(event) {
-  let modal = document.getElementById("modal-adicionar");
-  if (event.target === modal) {
-    fecharModalAdicionar();
-  }
+  const modal = document.getElementById("modal-adicionar");
+  if (event.target === modal) fecharModalAdicionar();
 }
 
 // ================= BACKEND =================
 function carregarImoveis() {
-  fetch("https://testes-digiwave-1-ad52.onrender.com/imoveis")
+  const div = document.getElementById("imoveis");
+  div.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  fetch(`${API}/imoveis`)
     .then(res => res.json())
     .then(data => {
-      const div = document.getElementById("imoveis");
       div.innerHTML = "";
 
+      const contador = document.getElementById("contador");
+      contador.textContent = `${data.length} imóvel${data.length !== 1 ? 'is' : ''} cadastrado${data.length !== 1 ? 's' : ''}`;
+
+      if (data.length === 0) {
+        div.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🏠</div>
+            <p>Nenhum imóvel cadastrado ainda</p>
+          </div>`;
+        return;
+      }
+
       data.forEach((imovel, index) => {
-        div.innerHTML += `
-          <div class="card">
-            <img src="${imovel.imagem}" class="img-imovel">
-            <h3>${imovel.titulo}</h3>
-            <p><span class="icon">💰</span> ${imovel.preco}</p>
-            <p><span class="icon">📍</span> ${imovel.cidade}</p>
-            <button onclick="deletarImovel(${index})">🗑️ Deletar</button>
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.innerHTML = `
+          <img src="${imovel.imagem || 'https://via.placeholder.com/400x200/111827/00d4ff?text=Sem+Imagem'}"
+               class="img-imovel"
+               onerror="this.src='https://via.placeholder.com/400x200/111827/00d4ff?text=Sem+Imagem'">
+          <div class="card-body">
+            <div class="card-titulo">${imovel.titulo || 'Sem título'}</div>
+            <div class="card-info">
+              <div class="card-info-item">
+                <span>💰</span>
+                <span class="card-preco">${imovel.preco || '—'}</span>
+              </div>
+              <div class="card-info-item">
+                <span>📍</span>
+                <span>${imovel.cidade || '—'}</span>
+              </div>
+              ${imovel.contato ? `
+              <div class="card-info-item">
+                <span>📞</span>
+                <span>${imovel.contato}</span>
+              </div>` : ''}
+            </div>
           </div>
+          ${isAdmin() ? `
+          <div class="card-footer">
+            <button class="btn-deletar" onclick="deletarImovel(${index})">🗑️ Remover</button>
+          </div>` : ''}
         `;
+        div.appendChild(card);
       });
+    })
+    .catch(() => {
+      div.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Erro ao carregar imóveis. Tente novamente.</p></div>`;
     });
 }
 
 function adicionarImovel() {
-  if (localStorage.getItem("logado") !== "admin") {
-    alert("Você precisa estar logado!");
+  if (!isAdmin()) {
+    mostrarToast("Apenas administradores podem adicionar imóveis", "erro");
     return;
   }
 
-  const titulo = document.getElementById('titulo').value;
-  const preco = document.getElementById('preco').value;
-  const imagem = document.getElementById('imagem').value;
-  const cidade = document.getElementById('cidade').value;
-  const contato = document.getElementById('contato').value;
+  const titulo = document.getElementById('titulo').value.trim();
+  const preco = document.getElementById('preco').value.trim();
+  const imagem = document.getElementById('imagem').value.trim();
+  const cidade = document.getElementById('cidade').value.trim();
+  const contato = document.getElementById('contato').value.trim();
 
-  fetch("https://testes-digiwave-1-ad52.onrender.com/imoveis", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ titulo, preco, imagem, cidade, contato })
-})
+  if (!titulo || !preco || !cidade) {
+    mostrarToast("Preencha pelo menos título, preço e cidade", "erro");
+    return;
+  }
+
+  fetch(`${API}/imoveis`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ titulo, preco, imagem, cidade, contato })
+  })
   .then(() => {
     carregarImoveis();
     fecharModalAdicionar();
-  });
+    mostrarToast("Imóvel adicionado com sucesso!", "sucesso");
+    // limpar campos
+    ['titulo','preco','imagem','cidade','contato'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+  })
+  .catch(() => mostrarToast("Erro ao adicionar imóvel", "erro"));
 }
 
 function deletarImovel(index) {
-  if (localStorage.getItem("logado") !== "admin") {
-    alert("Você precisa estar logado!");
+  if (!isAdmin()) {
+    mostrarToast("Apenas administradores podem remover imóveis", "erro");
     return;
   }
 
-  fetch(`https://testes-digiwave-1-ad52.onrender.com/imoveis/${index}`, {
-    method: "DELETE"
+  if (!confirm("Tem certeza que deseja remover este imóvel?")) return;
+
+  fetch(`${API}/imoveis/${index}`, { method: "DELETE" })
+  .then(() => {
+    carregarImoveis();
+    mostrarToast("Imóvel removido", "sucesso");
   })
-  .then(() => carregarImoveis());
+  .catch(() => mostrarToast("Erro ao remover imóvel", "erro"));
 }
 
 // ================= INICIALIZAÇÃO =================
 window.onload = function () {
-  if (localStorage.getItem("logado") === "true") {
+  const perfil = localStorage.getItem("perfil");
+  if (perfil === "admin" || perfil === "visitante") {
     iniciarSistema();
   } else {
     document.getElementById("tela-login").style.display = "flex";

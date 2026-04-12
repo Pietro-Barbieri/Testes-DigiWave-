@@ -1,25 +1,15 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
-import json
+from pymongo import MongoClient
 import os
 
 app = Flask(__name__)
 CORS(app)
 
-DB_FILE = "db.json"
-
-
-def read_db():
-    try:
-        with open(DB_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return []
-
-
-def write_db(data):
-    with open(DB_FILE, "w") as f:
-        json.dump(data, f)
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://pietro-barbieri:qkIVVDFckjQugYmB@cluster0.jame5bn.mongodb.net/?appName=Cluster0")
+client = MongoClient(MONGO_URI)
+db = client["digiwave"]
+imoveis_col = db["imoveis"]
 
 
 @app.route("/")
@@ -29,14 +19,13 @@ def index():
 
 @app.route("/imoveis", methods=["GET"])
 def get_imoveis():
-    return jsonify(read_db())
+    imoveis = list(imoveis_col.find({}, {"_id": 0}))
+    return jsonify(imoveis)
 
 
 @app.route("/imoveis", methods=["POST"])
 def add_imovel():
-    data = read_db()
     novo = request.json
-
     imovel = {
         "titulo": novo.get("titulo"),
         "preco": novo.get("preco"),
@@ -44,22 +33,16 @@ def add_imovel():
         "contato": novo.get("contato"),
         "imagem": novo.get("imagem")
     }
-
-    data.append(imovel)
-    write_db(data)
-
+    imoveis_col.insert_one(imovel)
     return jsonify({"message": "ok"})
 
 
 @app.route("/imoveis/<int:index>", methods=["DELETE"])
 def delete_imovel(index):
-    data = read_db()
-
-    if 0 <= index < len(data):
-        data.pop(index)
-        write_db(data)
+    imoveis = list(imoveis_col.find({}, {"_id": 1}))
+    if 0 <= index < len(imoveis):
+        imoveis_col.delete_one({"_id": imoveis[index]["_id"]})
         return jsonify({"message": "Deletado"})
-
     return jsonify({"error": "Erro"}), 404
 
 

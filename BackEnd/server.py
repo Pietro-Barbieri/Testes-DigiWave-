@@ -27,14 +27,35 @@ def get_imoveis():
 def add_imovel():
     novo = request.json
     imovel = {
-        "titulo": novo.get("titulo"),
-        "preco": novo.get("preco"),
-        "cidade": novo.get("cidade"),
-        "contato": novo.get("contato"),
-        "imagem": novo.get("imagem")
+        "titulo":   novo.get("titulo"),
+        "preco":    novo.get("preco"),
+        "cidade":   novo.get("cidade"),
+        "endereco": novo.get("endereco"),   # novo campo
+        "contato":  novo.get("contato"),
+        "imagem":   novo.get("imagem")
     }
     imoveis_col.insert_one(imovel)
     return jsonify({"message": "ok"})
+
+
+@app.route("/imoveis/<int:index>", methods=["PUT"])
+def update_imovel(index):
+    imoveis = list(imoveis_col.find({}, {"_id": 1}))
+    if 0 <= index < len(imoveis):
+        dados = request.json
+        imoveis_col.update_one(
+            {"_id": imoveis[index]["_id"]},
+            {"$set": {
+                "titulo":   dados.get("titulo"),
+                "preco":    dados.get("preco"),
+                "cidade":   dados.get("cidade"),
+                "endereco": dados.get("endereco"),
+                "contato":  dados.get("contato"),
+                "imagem":   dados.get("imagem")
+            }}
+        )
+        return jsonify({"message": "Atualizado"})
+    return jsonify({"error": "Não encontrado"}), 404
 
 
 @app.route("/imoveis/<int:index>", methods=["DELETE"])

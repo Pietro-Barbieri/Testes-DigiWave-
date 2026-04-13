@@ -240,6 +240,20 @@ main {
 
 .btn-deletar:hover { background: rgba(255, 77, 109, 0.2); border-color: var(--danger); }
 
+.btn-editar {
+  flex: 1;
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  color: var(--accent);
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.btn-editar:hover { background: rgba(0, 212, 255, 0.18); border-color: var(--accent); }
+
 /* EMPTY STATE */
 .empty-state {
   grid-column: 1 / -1;
@@ -625,6 +639,41 @@ main {
   </div>
 </div>
 
+<!-- MODAL EDITAR -->
+<div id="modal-editar" class="modal">
+  <div class="modal-content">
+    <button class="fechar" onclick="fecharModalEditar()">✕</button>
+    <div class="modal-title">Editar Imóvel</div>
+    <div class="modal-subtitle">Altere os dados e salve</div>
+    <input type="hidden" id="editar-index">
+    <div class="input-group">
+      <label>Título</label>
+      <input id="editar-titulo" placeholder="Ex: Casa com 3 quartos em condomínio">
+    </div>
+    <div class="input-group">
+      <label>Preço</label>
+      <input id="editar-preco" placeholder="Ex: R$ 450.000">
+    </div>
+    <div class="input-group">
+      <label>URL da Imagem</label>
+      <input id="editar-imagem" placeholder="https://...">
+    </div>
+    <div class="input-group">
+      <label>Cidade</label>
+      <input id="editar-cidade" placeholder="Ex: Belo Horizonte - MG">
+    </div>
+    <div class="input-group">
+      <label>Endereço</label>
+      <input id="editar-endereco" placeholder="Ex: Rua das Flores, 123 - Centro">
+    </div>
+    <div class="input-group">
+      <label>Contato (WhatsApp)</label>
+      <input id="editar-contato" placeholder="Ex: 35999990000 (só números)">
+    </div>
+    <button class="btn-primary" onclick="salvarEdicao()">💾 Salvar Alterações</button>
+  </div>
+</div>
+
 <!-- MODAL DETALHE -->
 <div id="modal-detalhe" class="modal">
   <div class="modal-content">
@@ -713,7 +762,64 @@ function iniciarSistema() {
   carregarImoveis();
 }
 
-// ================= MODAL ADICIONAR =================
+// ================= MODAL EDITAR =================
+function abrirModalEditar(index) {
+  if (!isAdmin()) {
+    mostrarToast("Apenas administradores podem editar imóveis", "erro");
+    return;
+  }
+
+  fetch(`${API}/imoveis`)
+    .then(res => res.json())
+    .then(data => {
+      const imovel = data[index];
+      if (!imovel) return;
+      document.getElementById("editar-index").value   = index;
+      document.getElementById("editar-titulo").value  = imovel.titulo   || "";
+      document.getElementById("editar-preco").value   = imovel.preco    || "";
+      document.getElementById("editar-imagem").value  = imovel.imagem   || "";
+      document.getElementById("editar-cidade").value  = imovel.cidade   || "";
+      document.getElementById("editar-endereco").value= imovel.endereco || "";
+      document.getElementById("editar-contato").value = imovel.contato  || "";
+      document.getElementById("modal-editar").style.display = "flex";
+    })
+    .catch(() => mostrarToast("Erro ao carregar dados do imóvel", "erro"));
+}
+
+function fecharModalEditar() {
+  document.getElementById("modal-editar").style.display = "none";
+}
+
+function salvarEdicao() {
+  if (!isAdmin()) return;
+
+  const index    = document.getElementById("editar-index").value;
+  const titulo   = document.getElementById("editar-titulo").value.trim();
+  const preco    = document.getElementById("editar-preco").value.trim();
+  const imagem   = document.getElementById("editar-imagem").value.trim();
+  const cidade   = document.getElementById("editar-cidade").value.trim();
+  const endereco = document.getElementById("editar-endereco").value.trim();
+  const contato  = document.getElementById("editar-contato").value.trim();
+
+  if (!titulo || !preco || !cidade) {
+    mostrarToast("Preencha pelo menos título, preço e cidade", "erro");
+    return;
+  }
+
+  fetch(`${API}/imoveis/${index}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ titulo, preco, imagem, cidade, endereco, contato })
+  })
+  .then(() => {
+    carregarImoveis();
+    fecharModalEditar();
+    mostrarToast("Imóvel atualizado com sucesso!", "sucesso");
+  })
+  .catch(() => mostrarToast("Erro ao atualizar imóvel", "erro"));
+}
+
+
 function abrirModalAdicionar() {
   if (!isAdmin()) {
     mostrarToast("Apenas administradores podem adicionar imóveis", "erro");
@@ -759,9 +865,11 @@ function fecharDetalhe() {
 // Fechar modais ao clicar fora
 window.onclick = function(event) {
   const modalAdicionar = document.getElementById("modal-adicionar");
-  const modalDetalhe = document.getElementById("modal-detalhe");
+  const modalDetalhe   = document.getElementById("modal-detalhe");
+  const modalEditar    = document.getElementById("modal-editar");
   if (event.target === modalAdicionar) fecharModalAdicionar();
-  if (event.target === modalDetalhe) fecharDetalhe();
+  if (event.target === modalDetalhe)   fecharDetalhe();
+  if (event.target === modalEditar)    fecharModalEditar();
 }
 
 // ================= BACKEND =================
@@ -816,6 +924,7 @@ function carregarImoveis() {
           </div>
           ${isAdmin() ? `
           <div class="card-footer">
+            <button class="btn-editar" onclick="event.stopPropagation(); abrirModalEditar(${index})">✏️ Editar</button>
             <button class="btn-deletar" onclick="event.stopPropagation(); deletarImovel(${index})">🗑️ Remover</button>
           </div>` : ''}
         `;
